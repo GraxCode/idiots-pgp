@@ -1,4 +1,4 @@
-# Idiot's PGP [![Release](https://img.shields.io/github/v/release/GraxCode/threadtear)](https://github.com/GraxCode/idiots-pgp/releases) [![Downloads](https://img.shields.io/github/downloads/GraxCode/threadtear/total)](https://github.com/GraxCode/threadtear/releases)
+# Idiot's PGP [![Release](https://img.shields.io/github/v/release/GraxCode/idiots-pgp)](https://github.com/GraxCode/idiots-pgp/releases) [![Downloads](https://img.shields.io/github/downloads/GraxCode/idiots-pgp/total)](https://github.com/GraxCode/idiots-pgp/releases)
 A simple PGP key manager, usable for every person. Can encrypt, decrypt, sign and verify messages. 
 Manage key pairs or only store public keys. Give your key (pairs) a name and description, to not forget what they are for.
 

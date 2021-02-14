@@ -2,3 +2,14 @@
 /.gradle/
 /build/
 /build/classes/java/main/
+/bin/
+/.classpath
+/.project
+/.settings/
+/*.jar
+/.idea
+/dist
+**/*.iml
+
+# Ignore logs
+*.log
