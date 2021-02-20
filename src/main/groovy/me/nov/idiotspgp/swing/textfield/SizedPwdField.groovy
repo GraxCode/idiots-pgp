@@ -12,11 +12,6 @@ class SizedPwdField extends JPasswordField {
 
   @Override
   Dimension getMinimumSize() {
-    return new Dimension(150, super.getSize().getHeight() as int)
-  }
-
-  @Override
-  Dimension getPreferredSize() {
-    return getMinimumSize()
+    return new Dimension(200, Math.max(25, super.size.height as int))
   }
 }

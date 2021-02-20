@@ -67,7 +67,7 @@ class IdiotsPGP extends JFrame {
           AES.decrypt(requestPassword().getPassword(),
                   new FileInputStream(input),
                   decrypted)
-        } catch (InvalidPasswordException e) {
+        } catch (InvalidPasswordException ignored) {
           JOptionPane.showMessageDialog(this, "Invalid password.",
                   "Error", JOptionPane.ERROR_MESSAGE)
           return
@@ -94,10 +94,9 @@ class IdiotsPGP extends JFrame {
       int result = jfc.showSaveDialog(this)
       if (result == JFileChooser.APPROVE_OPTION) {
         File output = jfc.getSelectedFile()
-
-        if (!output.getAbsolutePath().endsWith(".ipg")) {
+        if (!output.getAbsolutePath().endsWith(".ipg"))
           output = new File(output.getAbsolutePath() + ".ipg")
-        }
+
         AES.encrypt(256, requestPassword().getPassword(),
                 IOUtils.toInputStream(GSON.toJson((keyList.getModel() as DefaultListModel).toArray(), Key[].class), "UTF-8"),
                 new FileOutputStream(output))

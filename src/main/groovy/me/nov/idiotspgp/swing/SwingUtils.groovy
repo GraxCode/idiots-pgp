@@ -135,6 +135,8 @@ class SwingUtils {
 
   static JButton createSlimButton(Icon icon, String text, String tooltip, ActionListener l) {
     JButton jButton = new JButton(text)
+
+    jButton.setFont(new Font(jButton.font.name, Font.PLAIN, jButton.font.size - 1))
     jButton.setIcon(icon)
     jButton.putClientProperty(DarkButtonUI.KEY_NO_BORDERLESS_OVERWRITE, true)
     jButton.putClientProperty(DarkButtonUI.KEY_VARIANT, DarkButtonUI.VARIANT_BORDERLESS)

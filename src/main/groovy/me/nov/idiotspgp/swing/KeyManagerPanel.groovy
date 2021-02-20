@@ -57,15 +57,14 @@ class KeyManagerPanel extends JPanel {
 
     buttonBar.add(SwingUtils.createSlimButton(SwingUtils.getIcon("/add.svg"), "Generate a new public and secret key", {
 
-      def fields = [new LimitedSizedTextField(16), new LimitedSizedTextField(32), new LimitedSizedTextField(32), new SizedPwdField()]
+      def fields = [new LimitedSizedTextField(16).withSample("My Key"), new LimitedSizedTextField(32).withSample("Work email identification"),
+                    new LimitedSizedTextField(64).withSample("John Smith <smith@mymail.com>"), new SizedPwdField()]
       int result = JOptionPane.showConfirmDialog(IdiotsPGP.idiotsPGP,
               Dialog.fillInPanels(["Key name", "Key description", "Key pair user ID", "Private key passphrase"] as String[], fields as Component[]),
               "Generate a new key pair", JOptionPane.OK_CANCEL_OPTION)
       if (result == JOptionPane.OK_OPTION) {
         def userId = fields[2].getText()
         def pass = fields[3].getText()
-        OutputStream publicKey = new ByteArrayOutputStream()
-        OutputStream privateKey = new ByteArrayOutputStream()
         def keyPair = PGPEncryptionUtil.generateKeyPair(userId, pass, true)
         if (keyPair == null) {
           JOptionPane.showMessageDialog(IdiotsPGP.idiotsPGP,
@@ -80,7 +79,7 @@ class KeyManagerPanel extends JPanel {
     buttonBar.add(SwingUtils.createSlimButton(SwingUtils.getIcon("/blueKeyFile.svg"), "Import a public key from ASCII (armored) text", {
       try {
         PGPKeyUtil.readPublicKey(IdiotsPGP.idiotsPGP.editorPanel.textArea.getText())
-      } catch (Exception e) {
+      } catch (Exception ignored) {
         JOptionPane.showMessageDialog(IdiotsPGP.idiotsPGP,
                 "Not a valid public key (or key ring) in the text area.", "Error", JOptionPane.ERROR_MESSAGE)
         return
@@ -103,7 +102,7 @@ class KeyManagerPanel extends JPanel {
       if (key != null && !key.hasSecretKey) {
         try {
           PGPKeyUtil.readSecretKeyRing(IdiotsPGP.idiotsPGP.editorPanel.textArea.getText().getBytes(StandardCharsets.UTF_8))
-        } catch (Exception e) {
+        } catch (Exception ignored) {
           JOptionPane.showMessageDialog(IdiotsPGP.idiotsPGP,
                   "Not a valid secret key (or key ring) in the text area.", "Error", JOptionPane.ERROR_MESSAGE)
           return

@@ -1,6 +1,5 @@
 package me.nov.idiotspgp.swing.laf
 
-
 import com.github.weisj.darklaf.LafManager
 import com.github.weisj.darklaf.theme.*
 import com.github.weisj.darklaf.theme.info.ColorToneRule
@@ -8,6 +7,7 @@ import com.github.weisj.darklaf.theme.info.ContrastRule
 import com.github.weisj.darklaf.theme.info.DefaultThemeProvider
 import com.github.weisj.darklaf.theme.info.PreferredThemeStyle
 
+import javax.swing.*
 import javax.swing.plaf.ColorUIResource
 import java.awt.*
 
@@ -38,5 +38,6 @@ class DarkLookAndFeel {
       }
     })
     LafManager.installTheme(new PreferredThemeStyle(ContrastRule.STANDARD, ColorToneRule.LIGHT))
+    UIManager.put("TextField.arc", 5)
   }
 }
