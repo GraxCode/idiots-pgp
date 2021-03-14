@@ -1,5 +1,6 @@
 package me.nov.idiotspgp.swing
 
+
 import com.github.weisj.darklaf.components.border.DarkBorders
 import com.github.weisj.darklaf.components.text.NumberedTextComponent
 import com.google.zxing.BarcodeFormat
@@ -11,24 +12,46 @@ import me.nov.idiotspgp.IdiotsPGP
 import me.nov.idiotspgp.swing.Dialog
 import me.nov.idiotspgp.swing.textfield.SizedPwdField
 import me.rob.WrapLayout
+import org.apache.commons.io.IOUtils
 
 import javax.swing.*
 import javax.swing.border.CompoundBorder
+import javax.swing.event.DocumentEvent
+import javax.swing.event.DocumentListener
 import javax.swing.filechooser.FileNameExtensionFilter
 import javax.swing.undo.UndoManager
 import java.awt.*
 import java.nio.charset.StandardCharsets
 
 class EditorPanel extends JPanel {
-  JTextArea textArea
-  UndoManager manager
+  final JTextArea textArea
+  final UndoManager manager
   File inputFile
+  Color standardBg
 
   EditorPanel() {
     setLayout(new BorderLayout())
-    textArea = new JTextArea()
+    textArea = new JTextArea(IOUtils.toString(getClass().getResourceAsStream("/default-text.txt"), StandardCharsets.UTF_8))
     manager = new UndoManager()
     textArea.getDocument().addUndoableEditListener(manager)
+    standardBg = textArea.getBackground()
+    textArea.getDocument().addDocumentListener(new DocumentListener() {
+
+      @Override
+      void removeUpdate(DocumentEvent e) {
+        textArea.setBackground(standardBg)
+      }
+
+      @Override
+      void insertUpdate(DocumentEvent e) {
+        textArea.setBackground(standardBg)
+      }
+
+      @Override
+      void changedUpdate(DocumentEvent e) {
+        textArea.setBackground(standardBg)
+      }
+    });
 
     addTopActionBar()
 
@@ -73,7 +96,7 @@ class EditorPanel extends JPanel {
     buttonBar.add(SwingUtils.createSlimButton(SwingUtils.getIcon("/redo.svg"), "Redo", { manager.redo() }), c)
 
     buttonBar.add(SwingUtils.createSlimButton(SwingUtils.getIcon("/delete.svg"), "Clear", { textArea.setText("") }), c)
-    buttonBar.add(SwingUtils.createSlimButton(SwingUtils.getIcon("/image.svg"), "Make QR code", {
+    buttonBar.add(SwingUtils.createSlimButton(SwingUtils.getIcon("/image.svg"), "Convert to a QR code", {
       JFileChooser jfc = inputFile == null ? new JFileChooser() : new JFileChooser(inputFile.getParentFile())
       jfc.setAcceptAllFileFilterUsed(false)
       jfc.setSelectedFile(inputFile)
@@ -102,7 +125,7 @@ class EditorPanel extends JPanel {
     actionBar.setBorder(new CompoundBorder(DarkBorders.createLineBorder(1, 0, 0, 0),
             BorderFactory.createEmptyBorder(4, 4, 4, 4)))
 
-    JPanel buttonBar = new JPanel(new WrapLayout(FlowLayout.RIGHT,0,0))
+    JPanel buttonBar = new JPanel(new WrapLayout(FlowLayout.RIGHT, 0, 0))
 
     def getBytes = { (textArea.getText().trim() + "\n").getBytes(StandardCharsets.UTF_8) }
 
@@ -132,15 +155,19 @@ class EditorPanel extends JPanel {
                 key.getSecretKey(), pwdField.getPassword(), "SHA256")))
       }
     }))
-    buttonBar.add(SwingUtils.createSlimButton(SwingUtils.getIcon("/verify.svg"), "Verify Clear", "Verify a signed text using the associated public key", {
+    buttonBar.add(SwingUtils.createSlimButton(SwingUtils.getIcon("/verify.svg"), "Clear Verify", "Verify a signed text using the associated public key", {
+      textArea.setBackground(standardBg)
+      Color current = textArea.getBackground()
       def key = IdiotsPGP.idiotsPGP.currentKey()
       try {
         if (PGPEncryptionUtil.verifyClearSign(getBytes(), key.getPublicKeyRing())) {
+          textArea.setBackground(new Color((int)(current.getRed() + 128) / 2, (int)(current.getGreen()+ 255) / 2, (int)(current.getBlue()+ 128) / 2))
           JOptionPane.showMessageDialog(IdiotsPGP.idiotsPGP, "Text successfully verified with this key.",
                   "Success", JOptionPane.INFORMATION_MESSAGE)
         }
       } catch (Exception e) {
         e.printStackTrace()
+        textArea.setBackground(new Color((int)(current.getRed() + 255) / 2, (int)(current.getGreen()+ 128) / 2, (int)(current.getBlue()+ 128) / 2))
         JOptionPane.showMessageDialog(IdiotsPGP.idiotsPGP, "Text not verified with this key: " + e.toString(),
                 "Error", JOptionPane.ERROR_MESSAGE)
       }

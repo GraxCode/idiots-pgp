@@ -1,0 +1,15 @@
+Welcome to Idiot's PGP. A simple tool that has multiple PGP features
+you can easily use, without knowing anything about PGP.
+Each key list you manage will have an AES-encrypted master password,
+and each private / public key pair in that list, will also need
+a secret key when you use it. Public keys solely won't need a password.
+
+On the left side you can see the key list. Blue keys are public keys,
+golden keys are private keys. On the right side you can see the editor panel.
+Here you can write text, encrypt, sign, and so on.
+The action buttons can be hovered, to get information about what they do.
+
+You can verify this message using the public key on the left
+by clicking on "Clear Verify".
+
+Have fun enjoying privacy.

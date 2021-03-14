@@ -114,6 +114,17 @@ class KeyManagerPanel extends JPanel {
                 "No key selected to add a secret key, or key already has a secret key.", "Error", JOptionPane.ERROR_MESSAGE)
       }
     }), c)
+
+
+    buttonBar.add(SwingUtils.createSlimButton(SwingUtils.getIcon("/codeBlueKey.svg"), "Export a public key to ASCII (armored) text", {
+      def key = list.getSelectedValue()
+      if (key != null) {
+        IdiotsPGP.idiotsPGP.editorPanel.textArea.setText(PGPKeyUtil.exportAscii(key.getPublicKey()))
+      } else {
+        JOptionPane.showMessageDialog(IdiotsPGP.idiotsPGP,
+                "No key selected to export.", "Error", JOptionPane.ERROR_MESSAGE)
+      }
+    }), c)
     buttonBar.add(SwingUtils.createSlimButton(SwingUtils.getIcon("/edit.svg"), "Edit a key pair", {
       def key = list.getSelectedValue()
       if (key != null) {

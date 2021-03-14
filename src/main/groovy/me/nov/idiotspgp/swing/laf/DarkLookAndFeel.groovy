@@ -10,6 +10,7 @@ import com.github.weisj.darklaf.theme.info.PreferredThemeStyle
 import javax.swing.*
 import javax.swing.plaf.ColorUIResource
 import java.awt.*
+import java.util.logging.Level
 
 class DarkLookAndFeel {
 
@@ -28,7 +29,7 @@ class DarkLookAndFeel {
   }
 
   static void setLookAndFeel() {
-    LafManager.enableLogging(true)
+    LafManager.setLogLevel(Level.INFO)
     LafManager.registerDefaultsAdjustmentTask({ t, d ->
       if (Theme.isDark(t)) {
         Object p = d.get("backgroundContainer")
