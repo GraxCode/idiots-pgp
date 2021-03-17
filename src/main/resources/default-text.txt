@@ -1,3 +1,6 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
+
 Welcome to Idiot's PGP. A simple tool that has multiple PGP features
 you can easily use, without knowing anything about PGP.
 Each key list you manage will have an AES-encrypted master password,
@@ -13,3 +16,15 @@ You can verify this message using the public key on the left
 by clicking on "Clear Verify".
 
 Have fun enjoying privacy.
+-----BEGIN PGP SIGNATURE-----
+Version: BCPG v1.68
+
+iQEeBAEBCAAIBQJgUir7ARwACgkQgm4U0RJA6a3F2Qf/XyebkY7MsyV7XEvJxXBK
+kJ8cL+G7p0IJJO7DbCCcOPW8aFOyTsySMQsMLRrhDmVlIYnkFRrUx5XLqAV86ZsU
+u6yEhb4s+JJSIZZnluRsmumLHckJu19traw3Sl3MshxHby2N2FRmMg8sTzxXi58s
+Hru5kvOIKjFvDOOxejdZOZGVa5W6L2ntQ6fELaM/JhaAqpiwglA7kNmhnXosN07B
+IV50IMwV0yZP5NcIpqEFo8YQ/cVywRG/CFU1Xlx4LlcFlR5UM0Xrrj+t2LCUYLga
+b1xCoIFhsYVykrUOuDqpdZmw+dVRNJ9Ct+/3msPTAN53EyQWcP3UzQ5/kACulp/Q
+yQ==
+=j+Dg
+-----END PGP SIGNATURE-----

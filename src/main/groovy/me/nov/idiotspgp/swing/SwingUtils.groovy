@@ -8,6 +8,7 @@ import javax.swing.*
 import javax.swing.border.Border
 import java.awt.*
 import java.awt.event.ActionListener
+import java.util.function.BooleanSupplier
 
 class SwingUtils {
 
@@ -118,33 +119,5 @@ class SwingUtils {
 
   static Icon getIcon(String path, int width, int height, boolean themed) {
     return ICON_LOADER.getIcon(path, width, height, themed)
-  }
-
-  static JButton createSlimButton(Icon icon, String tooltip, ActionListener l) {
-    JButton jButton = new JButton(icon)
-    jButton.putClientProperty(DarkButtonUI.KEY_NO_BORDERLESS_OVERWRITE, true)
-    jButton.putClientProperty(DarkButtonUI.KEY_VARIANT, DarkButtonUI.VARIANT_BORDERLESS)
-    jButton.putClientProperty(DarkButtonUI.KEY_THIN, true)
-    jButton.putClientProperty(DarkButtonUI.KEY_SQUARE, true)
-    if (tooltip != null)
-      jButton.setToolTipText(tooltip)
-    if (l != null)
-      jButton.addActionListener(l)
-    return jButton
-  }
-
-  static JButton createSlimButton(Icon icon, String text, String tooltip, ActionListener l) {
-    JButton jButton = new JButton(text)
-
-    jButton.setFont(new Font(jButton.font.name, Font.PLAIN, jButton.font.size - 1))
-    jButton.setIcon(icon)
-    jButton.putClientProperty(DarkButtonUI.KEY_NO_BORDERLESS_OVERWRITE, true)
-    jButton.putClientProperty(DarkButtonUI.KEY_VARIANT, DarkButtonUI.VARIANT_BORDERLESS)
-    jButton.putClientProperty(DarkButtonUI.KEY_THIN, true)
-    if (tooltip != null)
-      jButton.setToolTipText(tooltip)
-    if (l != null)
-      jButton.addActionListener(l)
-    return jButton
   }
 }

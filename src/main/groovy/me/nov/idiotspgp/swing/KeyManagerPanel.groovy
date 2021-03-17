@@ -8,10 +8,12 @@ import io.subutai.pgp.PGPKeyUtil
 import me.nov.idiotspgp.IdiotsPGP
 import me.nov.idiotspgp.Key
 import me.nov.idiotspgp.swing.Dialog
+import me.nov.idiotspgp.swing.button.SlimButton
 import me.nov.idiotspgp.swing.list.KeyList
 import me.nov.idiotspgp.swing.textfield.LimitedSizedTextField
 import me.nov.idiotspgp.swing.textfield.SizedPwdField
 import me.nov.idiotspgp.util.DiffMath
+import org.apache.commons.io.IOUtils
 
 import javax.swing.*
 import javax.swing.border.CompoundBorder
@@ -25,6 +27,10 @@ class KeyManagerPanel extends JPanel {
     addTopActionBar(list)
     this.add(new JScrollPane(list), BorderLayout.CENTER)
     addBottomActionBar(list)
+
+    ((DefaultListModel<Key>)list.getModel()).addElement(new Key(name: "Idiot's PGP Key", description: "A key to verify the welcome message",
+    keyPair: new KeyPair(pubKeyring: IOUtils.toByteArray(KeyManagerPanel.class.getResourceAsStream("/default.key")))
+    ))
   }
 
   void addTopActionBar(KeyList list) {
@@ -55,7 +61,7 @@ class KeyManagerPanel extends JPanel {
     c.weightx = c.weighty = 1.0
     c.anchor = GridBagConstraints.WEST
 
-    buttonBar.add(SwingUtils.createSlimButton(SwingUtils.getIcon("/add.svg"), "Generate a new public and secret key", {
+    buttonBar.add(new SlimButton(SwingUtils.getIcon("/add.svg"), "Generate a new public and secret key", {
 
       def fields = [new LimitedSizedTextField(16).withSample("My Key"), new LimitedSizedTextField(32).withSample("Work email identification"),
                     new LimitedSizedTextField(64).withSample("John Smith <smith@mymail.com>"), new SizedPwdField()]
@@ -76,7 +82,7 @@ class KeyManagerPanel extends JPanel {
         (list.getModel() as DefaultListModel).addElement(key)
       }
     }), c)
-    buttonBar.add(SwingUtils.createSlimButton(SwingUtils.getIcon("/blueKeyFile.svg"), "Import a public key from ASCII (armored) text", {
+    buttonBar.add(new SlimButton(SwingUtils.getIcon("/blueKeyFile.svg"), "Import a public key from ASCII (armored) text", {
       try {
         PGPKeyUtil.readPublicKey(IdiotsPGP.idiotsPGP.editorPanel.textArea.getText())
       } catch (Exception ignored) {
@@ -95,9 +101,9 @@ class KeyManagerPanel extends JPanel {
         (list.getModel() as DefaultListModel).addElement(key)
         IdiotsPGP.idiotsPGP.editorPanel.textArea.setText("")
       }
-    }), c)
+    }).withCriteria { IdiotsPGP.idiotsPGP.editorPanel.textArea.getText().length() > 128 }, c)
 
-    buttonBar.add(SwingUtils.createSlimButton(SwingUtils.getIcon("/goldKeyFile.svg"), "Import a secret key from ASCII (armored) text", {
+    buttonBar.add(new SlimButton(SwingUtils.getIcon("/goldKeyFile.svg"), "Import a secret key from ASCII (armored) text", {
       def key = list.getSelectedValue()
       if (key != null && !key.hasSecretKey) {
         try {
@@ -113,10 +119,12 @@ class KeyManagerPanel extends JPanel {
         JOptionPane.showMessageDialog(IdiotsPGP.idiotsPGP,
                 "No key selected to add a secret key, or key already has a secret key.", "Error", JOptionPane.ERROR_MESSAGE)
       }
-    }), c)
+    }).withCriteria {
+      def key = list.getSelectedValue()
+      key != null && !key.hasSecretKey && IdiotsPGP.idiotsPGP.editorPanel.textArea.getText().length() > 128 }, c)
 
 
-    buttonBar.add(SwingUtils.createSlimButton(SwingUtils.getIcon("/codeBlueKey.svg"), "Export a public key to ASCII (armored) text", {
+    buttonBar.add(new SlimButton(SwingUtils.getIcon("/codeBlueKey.svg"), "Export a public key to ASCII (armored) text", {
       def key = list.getSelectedValue()
       if (key != null) {
         IdiotsPGP.idiotsPGP.editorPanel.textArea.setText(PGPKeyUtil.exportAscii(key.getPublicKey()))
@@ -124,8 +132,8 @@ class KeyManagerPanel extends JPanel {
         JOptionPane.showMessageDialog(IdiotsPGP.idiotsPGP,
                 "No key selected to export.", "Error", JOptionPane.ERROR_MESSAGE)
       }
-    }), c)
-    buttonBar.add(SwingUtils.createSlimButton(SwingUtils.getIcon("/edit.svg"), "Edit a key pair", {
+    }).withCriteria  {list.getSelectedValue() != null }, c)
+    buttonBar.add(new SlimButton(SwingUtils.getIcon("/edit.svg"), "Edit a key pair", {
       def key = list.getSelectedValue()
       if (key != null) {
         def fields = [new LimitedSizedTextField(key.name, 16), new LimitedSizedTextField(key.description, 32)]
@@ -142,8 +150,8 @@ class KeyManagerPanel extends JPanel {
         JOptionPane.showMessageDialog(IdiotsPGP.idiotsPGP,
                 "No key selected.", "Error", JOptionPane.ERROR_MESSAGE)
       }
-    }), c)
-    buttonBar.add(SwingUtils.createSlimButton(SwingUtils.getIcon("/delete.svg"), "Delete a key pair", {
+    }).withCriteria  {list.getSelectedValue() != null }, c)
+    buttonBar.add(new SlimButton(SwingUtils.getIcon("/delete.svg"), "Delete a key pair", {
 
       int result = JOptionPane.showConfirmDialog(IdiotsPGP.idiotsPGP,
               "Are you sure you want to delete this key pair? This cannot be undone.",
@@ -151,7 +159,7 @@ class KeyManagerPanel extends JPanel {
       if (result == JOptionPane.OK_OPTION)
         (list.getModel() as DefaultListModel).removeElementAt(list.getSelectedIndex())
 
-    }), c)
+    }).withCriteria  {list.getSelectedValue() != null }, c)
 
     actionBar.add(buttonBar, BorderLayout.WEST)
     this.add(actionBar, BorderLayout.PAGE_END)

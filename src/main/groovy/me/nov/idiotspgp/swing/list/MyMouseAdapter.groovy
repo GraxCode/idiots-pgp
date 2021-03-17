@@ -26,8 +26,10 @@ class MyMouseAdapter extends MouseInputAdapter {
   void mouseDragged(MouseEvent e) {
     if (mouseDragging) {
       int currentIndex = list.locationToIndex(e.getPoint())
-      if (currentIndex != dragSourceIndex) {
+      if (currentIndex != dragSourceIndex && dragSourceIndex != -1) {
         int dragTargetIndex = list.getSelectedIndex()
+        if(dragTargetIndex == -1)
+          return
         DefaultListModel myListModel = (DefaultListModel) list.getModel()
         Object dragElement = myListModel.get(dragSourceIndex)
         myListModel.remove(dragSourceIndex)

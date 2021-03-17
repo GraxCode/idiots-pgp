@@ -41,6 +41,8 @@ class Key {
   }
 
   PGPSecretKeyRing getSecretKeyRing() {
+    if(keyPair.secKeyring == null)
+      throw new IllegalStateException("Key doesn't have a secret keyring")
     return PGPKeyUtil.readSecretKeyRing(keyPair.secKeyring)
   }
 

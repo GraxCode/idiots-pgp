@@ -10,6 +10,7 @@ import com.google.zxing.qrcode.QRCodeWriter
 import io.subutai.pgp.PGPEncryptionUtil
 import me.nov.idiotspgp.IdiotsPGP
 import me.nov.idiotspgp.swing.Dialog
+import me.nov.idiotspgp.swing.button.SlimButton
 import me.nov.idiotspgp.swing.textfield.SizedPwdField
 import me.rob.WrapLayout
 import org.apache.commons.io.IOUtils
@@ -39,25 +40,30 @@ class EditorPanel extends JPanel {
 
       @Override
       void removeUpdate(DocumentEvent e) {
-        textArea.setBackground(standardBg)
+        areaChanged()
       }
 
       @Override
       void insertUpdate(DocumentEvent e) {
-        textArea.setBackground(standardBg)
+        areaChanged()
       }
 
       @Override
       void changedUpdate(DocumentEvent e) {
-        textArea.setBackground(standardBg)
+        areaChanged()
       }
-    });
 
+    })
     addTopActionBar()
 
     this.add(new NumberedTextComponent(textArea), BorderLayout.CENTER)
 
     addBottomActionBar()
+  }
+
+  void areaChanged() {
+    textArea.setBackground(standardBg)
+    SlimButton.updateAllStates()
   }
 
   private void addTopActionBar() {
@@ -70,7 +76,7 @@ class EditorPanel extends JPanel {
     c.weightx = c.weighty = 1.0
     c.anchor = GridBagConstraints.WEST
 
-    buttonBar.add(SwingUtils.createSlimButton(SwingUtils.getIcon("/menu-open.svg"), "Load a file into the editor", {
+    buttonBar.add(new SlimButton(SwingUtils.getIcon("/menu-open.svg"), "Load a file into the editor", {
       JFileChooser jfc = new JFileChooser()
       jfc.setAcceptAllFileFilterUsed(true)
       jfc.setDialogTitle("Load a file into the editor")
@@ -81,7 +87,7 @@ class EditorPanel extends JPanel {
         inputFile = input
       }
     }), c)
-    buttonBar.add(SwingUtils.createSlimButton(SwingUtils.getIcon("/menu-saveall.svg"), "Save as a file", {
+    buttonBar.add(new SlimButton(SwingUtils.getIcon("/menu-saveall.svg"), "Save as a file", {
       JFileChooser jfc = inputFile == null ? new JFileChooser() : new JFileChooser(inputFile.getParentFile())
       jfc.setAcceptAllFileFilterUsed(true)
       jfc.setSelectedFile(inputFile)
@@ -92,11 +98,11 @@ class EditorPanel extends JPanel {
         output.write(textArea.getText(), "UTF-8")
       }
     }), c)
-    buttonBar.add(SwingUtils.createSlimButton(SwingUtils.getIcon("/undo.svg"), "Undo", { manager.undo() }), c)
-    buttonBar.add(SwingUtils.createSlimButton(SwingUtils.getIcon("/redo.svg"), "Redo", { manager.redo() }), c)
+    buttonBar.add(new SlimButton(SwingUtils.getIcon("/undo.svg"), "Undo", { manager.undo() }).withCriteria { manager.canUndo() }, c)
+    buttonBar.add(new SlimButton(SwingUtils.getIcon("/redo.svg"), "Redo", { manager.redo() }).withCriteria { manager.canRedo() }, c)
 
-    buttonBar.add(SwingUtils.createSlimButton(SwingUtils.getIcon("/delete.svg"), "Clear", { textArea.setText("") }), c)
-    buttonBar.add(SwingUtils.createSlimButton(SwingUtils.getIcon("/image.svg"), "Convert to a QR code", {
+    buttonBar.add(new SlimButton(SwingUtils.getIcon("/delete.svg"), "Clear", { textArea.setText("") }), c)
+    buttonBar.add(new SlimButton(SwingUtils.getIcon("/image.svg"), "Convert to a QR code", {
       JFileChooser jfc = inputFile == null ? new JFileChooser() : new JFileChooser(inputFile.getParentFile())
       jfc.setAcceptAllFileFilterUsed(false)
       jfc.setSelectedFile(inputFile)
@@ -112,7 +118,7 @@ class EditorPanel extends JPanel {
         BitMatrix bitMatrix = qrCodeWriter.encode(textArea.getText(), BarcodeFormat.QR_CODE, 1000, 1000)
         MatrixToImageWriter.writeToPath(bitMatrix, "PNG", output.toPath())
       }
-    }), c)
+    }).withCriteria { !textArea.getText().trim().isEmpty() }, c)
 
     actionBar.add(buttonBar, BorderLayout.WEST)
     this.add(actionBar, BorderLayout.PAGE_START)
@@ -129,11 +135,18 @@ class EditorPanel extends JPanel {
 
     def getBytes = { (textArea.getText().trim() + "\n").getBytes(StandardCharsets.UTF_8) }
 
-    buttonBar.add(SwingUtils.createSlimButton(SwingUtils.getIcon("/colBlueKey.svg"), "Encrypt", "<html>Encrypt text using <b>the receivers</b> public key", {
+    def keyNonNull =  { IdiotsPGP.idiotsPGP.currentKey() != null }
+
+    def keyPrivateNonNull =  {
+      def key = IdiotsPGP.idiotsPGP.currentKey()
+      return key != null && key.hasSecretKey
+    }
+
+    buttonBar.add(new SlimButton(SwingUtils.getIcon("/colBlueKey.svg"), "Encrypt", "<html>Encrypt text using <b>the receivers</b> public key", {
       def key = IdiotsPGP.idiotsPGP.currentKey()
       textArea.setText(new String(PGPEncryptionUtil.encrypt(getBytes(), key.getPublicKey(), true)))
-    }))
-    buttonBar.add(SwingUtils.createSlimButton(SwingUtils.getIcon("/colGoldKey.svg"), "Decrypt", "Decrypt text using a secret key", {
+    }).withCriteria (keyNonNull))
+    buttonBar.add(new SlimButton(SwingUtils.getIcon("/colGoldKey.svg"), "Decrypt", "Decrypt text using a secret key", {
       def key = IdiotsPGP.idiotsPGP.currentKey()
       if (key.assertPrivate()) {
         try {
@@ -146,16 +159,16 @@ class EditorPanel extends JPanel {
                   "Error", JOptionPane.ERROR_MESSAGE)
         }
       }
-    }))
-    buttonBar.add(SwingUtils.createSlimButton(SwingUtils.getIcon("/sign.svg"), "Clear Sign", "Sign a text using a secret key", {
+    }).withCriteria (keyPrivateNonNull))
+    buttonBar.add(new SlimButton(SwingUtils.getIcon("/sign.svg"), "Clear Sign", "Sign a text using a secret key", {
       def key = IdiotsPGP.idiotsPGP.currentKey()
       if (key.assertPrivate()) {
         def pwdField = requestPassword()
         textArea.setText(new String(PGPEncryptionUtil.clearSign(getBytes(),
                 key.getSecretKey(), pwdField.getPassword(), "SHA256")))
       }
-    }))
-    buttonBar.add(SwingUtils.createSlimButton(SwingUtils.getIcon("/verify.svg"), "Clear Verify", "Verify a signed text using the associated public key", {
+    }).withCriteria(keyPrivateNonNull))
+    buttonBar.add(new SlimButton(SwingUtils.getIcon("/verify.svg"), "Clear Verify", "Verify a signed text using the associated public key", {
       textArea.setBackground(standardBg)
       Color current = textArea.getBackground()
       def key = IdiotsPGP.idiotsPGP.currentKey()
@@ -171,16 +184,18 @@ class EditorPanel extends JPanel {
         JOptionPane.showMessageDialog(IdiotsPGP.idiotsPGP, "Text not verified with this key: " + e.toString(),
                 "Error", JOptionPane.ERROR_MESSAGE)
       }
-    }))
-    buttonBar.add(SwingUtils.createSlimButton(SwingUtils.getIcon("/blueKey.svg"), "Sign & Encrypt", "Sign a text using a secret key", {
+    }).withCriteria(keyNonNull))
+    buttonBar.add(new SlimButton(SwingUtils.getIcon("/blueKey.svg"), "Sign & Encrypt", "Sign a text using a secret key and encrypt using <b>the receivers</b> public key.", {
       def key = IdiotsPGP.idiotsPGP.currentKey()
       if (key.assertPrivate()) {
+        // TODO choose receivers public key
         textArea.setText(new String(PGPEncryptionUtil.signAndEncrypt(getBytes(),
                 key.getSecretKey(), requestPassword().getText(), key.getPublicKey(), true)))
       }
-    }))
-    buttonBar.add(SwingUtils.createSlimButton(SwingUtils.getIcon("/goldKey.svg"), "Decrypt & Verify", "Verify a signed text using the associated public key", {
+    }).withCriteria(keyPrivateNonNull))
+    buttonBar.add(new SlimButton(SwingUtils.getIcon("/goldKey.svg"), "Decrypt & Verify", "Verify a signed text using <b>the senders</b> public key and decrypt using your secret key.", {
       def key = IdiotsPGP.idiotsPGP.currentKey()
+      // TODO choose senders public key
       try {
         textArea.setText(new String(PGPEncryptionUtil.decryptAndVerify(getBytes(), key.getSecretKey(), requestPassword().getText(), key.getPublicKey())))
         JOptionPane.showMessageDialog(IdiotsPGP.idiotsPGP, "Text successfully decrypted and verified with this key.",
@@ -190,7 +205,7 @@ class EditorPanel extends JPanel {
         JOptionPane.showMessageDialog(IdiotsPGP.idiotsPGP, "Decrypt and verify unsuccessful: " + e.toString(),
                 "Error", JOptionPane.ERROR_MESSAGE)
       }
-    }))
+    }).withCriteria(keyPrivateNonNull))
     actionBar.add(buttonBar, BorderLayout.CENTER)
     this.add(actionBar, BorderLayout.PAGE_END)
   }
